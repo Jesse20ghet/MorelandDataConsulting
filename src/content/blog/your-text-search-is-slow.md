@@ -1,9 +1,11 @@
 ---
-title: "Why Your Query Got Slow After Nothing Changed"
-description: "A query that ran fine for months suddenly crawls, and no one touched the code. Here's the usual culprit — and how to confirm it in a few minutes."
+title: "Your text search is slow"
+description: "You're using a wildcard and now SQL isn't using your index"
 pubDate: 2026-07-10
 draft: false
 ---
+
+![Test Image](/images/test-image.png)
 
 You didn't deploy anything. No one changed the query. The data didn't balloon overnight. And yet this morning, a stored procedure that used to run in 200 milliseconds is taking eight seconds, and it's dragging everything behind it.
 
