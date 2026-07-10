@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+const fmt = (d) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+<Base title={`${post.data.title} — Moreland Data Consulting`} description={post.data.description}>
+  <div class="wrap">
+    <article class="post">
+      <div class="post-meta">
+        {fmt(post.data.pubDate)}
+        {post.data.updatedDate && ` · Updated ${fmt(post.data.updatedDate)}`}
+      </div>
+      <h1>{post.data.title}</h1>
+      <p class="post-desc">{post.data.description}</p>
+
+      <div class="prose">
+        <Content />
+      </div>
+
+      <div class="post-foot">
+        <a href="/blog" class="back">← All posts</a>
+        <a href="/#contact" class="cta">Got a SQL Server that's slow? →</a>
+      </div>
+    </article>
+  </div>
+</Base>

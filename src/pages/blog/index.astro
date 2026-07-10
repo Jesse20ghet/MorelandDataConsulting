@@ -1,0 +1,32 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const fmt = (d) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+<Base
+  title="Blog — Moreland Data Consulting"
+  description="Notes on SQL Server performance: tuning, index strategy, and query optimization, from real production work."
+>
+  <div class="wrap">
+    <div class="blog-head">
+      <div class="eyebrow">The blog</div>
+      <h1>SQL Server performance, written down.</h1>
+      <p>Notes from real work — diagnosing slow queries, designing indexes, and untangling the performance problems that show up under load.</p>
+    </div>
+
+    <div class="post-list">
+      {posts.map((post) => (
+        <a href={`/blog/${post.slug}/`} class="post-item">
+          <div class="date">{fmt(post.data.pubDate)}</div>
+          <h2>{post.data.title}</h2>
+          <p>{post.data.description}</p>
+          <span class="more">Read →</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</Base>

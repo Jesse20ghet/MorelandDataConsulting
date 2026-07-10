@@ -1,0 +1,104 @@
+:root {
+  --ink: #0f1922;
+  --ink-soft: #3d4c58;
+  --ink-faint: #6b7a86;
+  --paper: #ffffff;
+  --mist: #f4f7f9;
+  --line: #e4ebef;
+  --signal: #1b6ef3;
+  --signal-deep: #0b4fc0;
+  --ok: #17916b;
+  --radius: 12px;
+  --maxw: 760px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+a { color: var(--signal-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 28px; }
+
+/* nav — mirrors main site */
+nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+nav .nav-inner { max-width: 1080px; margin: 0 auto; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; height: 66px; }
+.brand { display: flex; align-items: center; gap: 11px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
+.brand:hover { text-decoration: none; }
+.brand .mark {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: linear-gradient(150deg, var(--signal), var(--signal-deep));
+  position: relative; flex: none;
+}
+.brand .mark::before, .brand .mark::after {
+  content: ""; position: absolute; left: 7px; right: 7px; height: 2.4px; border-radius: 2px; background: rgba(255,255,255,0.92);
+}
+.brand .mark::before { top: 9px; box-shadow: 0 5.5px 0 rgba(255,255,255,0.55); }
+.brand .mark::after { top: 20px; background: rgba(255,255,255,0.75); }
+.nav-links { display: flex; align-items: center; gap: 28px; }
+.nav-links a { font-size: 14.5px; color: var(--ink-soft); font-weight: 500; }
+.nav-links a:hover { color: var(--ink); text-decoration: none; }
+.nav-cta { background: var(--ink); color: #fff !important; padding: 9px 17px; border-radius: 8px; font-size: 14px; }
+.nav-cta:hover { background: #1d2c38; text-decoration: none; }
+
+/* blog index */
+.blog-head { padding: 76px 0 20px; }
+.blog-head .eyebrow { font-family:'JetBrains Mono', monospace; font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--signal-deep); margin-bottom: 15px; }
+.blog-head h1 { font-family:'Newsreader', Georgia, serif; font-weight: 500; font-size: clamp(2.1rem, 5vw, 3rem); letter-spacing: -0.02em; line-height: 1.08; }
+.blog-head p { margin-top: 16px; color: var(--ink-soft); font-size: 1.08rem; max-width: 54ch; }
+
+.post-list { padding: 40px 0 90px; display: flex; flex-direction: column; gap: 4px; }
+.post-item {
+  display: block; padding: 26px 0; border-top: 1px solid var(--line);
+  transition: padding-left .15s;
+}
+.post-item:hover { text-decoration: none; padding-left: 8px; }
+.post-item:last-child { border-bottom: 1px solid var(--line); }
+.post-item .date { font-family:'JetBrains Mono', monospace; font-size: 12.5px; color: var(--ink-faint); letter-spacing: .02em; }
+.post-item h2 { font-family:'Newsreader', serif; font-weight: 500; font-size: 1.5rem; letter-spacing: -0.01em; color: var(--ink); margin: 6px 0 8px; line-height: 1.2; }
+.post-item p { color: var(--ink-soft); font-size: 15px; }
+.post-item .more { display: inline-block; margin-top: 12px; font-size: 14px; color: var(--signal-deep); font-weight: 500; }
+
+/* single post */
+article.post { padding: 66px 0 40px; }
+.post-meta { font-family:'JetBrains Mono', monospace; font-size: 12.5px; color: var(--ink-faint); letter-spacing: .02em; }
+article.post h1 { font-family:'Newsreader', serif; font-weight: 500; font-size: clamp(2rem, 4.6vw, 2.8rem); letter-spacing: -0.02em; line-height: 1.1; margin: 14px 0 0; }
+.post-desc { margin-top: 16px; font-size: 1.15rem; color: var(--ink-soft); line-height: 1.5; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+
+.prose { padding: 36px 0 20px; }
+.prose > * + * { margin-top: 22px; }
+.prose h2 { font-family:'Newsreader', serif; font-weight: 600; font-size: 1.6rem; letter-spacing: -0.01em; margin-top: 44px; line-height: 1.2; }
+.prose h3 { font-size: 1.25rem; font-weight: 600; margin-top: 34px; letter-spacing: -0.01em; }
+.prose p { font-size: 1.06rem; color: var(--ink-soft); }
+.prose a { color: var(--signal-deep); text-decoration: underline; text-underline-offset: 2px; }
+.prose ul, .prose ol { padding-left: 1.4em; color: var(--ink-soft); font-size: 1.06rem; }
+.prose li + li { margin-top: 8px; }
+.prose strong { color: var(--ink); font-weight: 600; }
+.prose blockquote { border-left: 3px solid var(--signal); padding: 4px 0 4px 22px; color: var(--ink-faint); font-style: italic; }
+.prose code { font-family:'JetBrains Mono', monospace; font-size: 0.88em; background: var(--mist); border: 1px solid var(--line); border-radius: 5px; padding: 2px 6px; color: var(--ink); }
+.prose pre { background: #0d1720; color: #dbe4ea; padding: 20px 22px; border-radius: var(--radius); overflow-x: auto; font-family:'JetBrains Mono', monospace; font-size: 13.5px; line-height: 1.6; }
+.prose pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
+.prose img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--line); }
+
+.post-foot { margin-top: 44px; padding: 28px 0 80px; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.post-foot .back { font-size: 14.5px; color: var(--signal-deep); font-weight: 500; }
+.post-foot .cta { background: var(--signal); color: #fff !important; padding: 11px 20px; border-radius: 9px; font-size: 14.5px; font-weight: 500; }
+.post-foot .cta:hover { text-decoration: none; }
+
+footer { border-top: 1px solid var(--line); padding: 36px 0; }
+footer .foot-inner { max-width: 1080px; margin: 0 auto; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--ink-faint); }
+footer a { color: var(--ink-faint); }
+footer a:hover { color: var(--ink); }
+
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 4px; }

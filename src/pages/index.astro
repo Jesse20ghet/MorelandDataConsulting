@@ -1,0 +1,365 @@
+---
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moreland Data Consulting — SQL Server Performance Tuning</title>
+<meta name="description" content="Independent SQL Server performance consulting built on three pillars: performance tuning, index strategy, and query optimization. Diagnosis-first, senior-level, direct.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style is:global>
+  :root {
+    --ink: #0f1922;
+    --ink-soft: #3d4c58;
+    --ink-faint: #6b7a86;
+    --paper: #ffffff;
+    --mist: #f4f7f9;
+    --line: #e4ebef;
+    --signal: #1b6ef3;
+    --signal-deep: #0b4fc0;
+    --ok: #17916b;
+    --radius: 12px;
+    --maxw: 1080px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 28px; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ---- nav ---- */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255,255,255,0.82);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 66px; }
+  .brand { display: flex; align-items: center; gap: 11px; font-weight: 600; letter-spacing: -0.01em; }
+  .brand .mark {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(150deg, var(--signal), var(--signal-deep));
+    position: relative; flex: none;
+  }
+  .brand .mark::before, .brand .mark::after {
+    content: ""; position: absolute; left: 7px; right: 7px; height: 2.4px; border-radius: 2px; background: rgba(255,255,255,0.92);
+  }
+  .brand .mark::before { top: 9px; box-shadow: 0 5.5px 0 rgba(255,255,255,0.55); }
+  .brand .mark::after { top: 20px; background: rgba(255,255,255,0.75); }
+  .nav-links { display: flex; align-items: center; gap: 30px; }
+  .nav-links a { font-size: 14.5px; color: var(--ink-soft); font-weight: 500; transition: color .15s; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-links a.blog-link { display: inline-flex; align-items: center; gap: 5px; }
+  .nav-links a.blog-link svg { width: 13px; height: 13px; opacity: .6; }
+  .nav-cta {
+    background: var(--ink); color: #fff !important; padding: 9px 17px; border-radius: 8px;
+    font-size: 14px; font-weight: 500; transition: background .15s, transform .15s;
+  }
+  .nav-cta:hover { background: #1d2c38; transform: translateY(-1px); }
+  @media (max-width: 720px) { .nav-links .plain { display: none; } }
+
+  /* ---- hero ---- */
+  .hero { padding: 92px 0 76px; position: relative; overflow: hidden; }
+  .hero::after {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background:
+      radial-gradient(680px 340px at 82% -8%, rgba(27,110,243,0.07), transparent 70%),
+      radial-gradient(520px 300px at 0% 14%, rgba(23,145,107,0.05), transparent 68%);
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 500; color: var(--signal-deep);
+    background: rgba(27,110,243,0.08); border: 1px solid rgba(27,110,243,0.16);
+    padding: 5px 13px; border-radius: 999px; letter-spacing: .01em; margin-bottom: 26px;
+  }
+  .eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px rgba(23,145,107,0.16); }
+  h1 {
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 500; font-size: clamp(2.35rem, 5.4vw, 4rem);
+    line-height: 1.06; letter-spacing: -0.018em; color: var(--ink);
+    max-width: 15ch;
+  }
+  h1 em { font-style: italic; color: var(--signal-deep); }
+  .lede {
+    margin-top: 24px; font-size: clamp(1.05rem, 2vw, 1.24rem);
+    color: var(--ink-soft); max-width: 56ch; line-height: 1.55;
+  }
+  .hero-cta { margin-top: 38px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--signal); color: #fff; font-weight: 500; font-size: 15.5px;
+    padding: 14px 26px; border-radius: 10px; display: inline-flex; align-items: center; gap: 10px;
+    box-shadow: 0 1px 2px rgba(11,79,192,0.3), 0 8px 24px -8px rgba(27,110,243,0.5);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 1px 2px rgba(11,79,192,0.3), 0 14px 30px -8px rgba(27,110,243,0.55); }
+  .btn-primary svg { width: 17px; height: 17px; }
+  .avail { font-size: 14px; color: var(--ink-faint); display: flex; align-items: center; gap: 9px; }
+  .avail .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); position: relative; }
+  .avail .pulse::after { content:""; position:absolute; inset:-4px; border-radius:50%; border:1px solid rgba(23,145,107,0.4); animation: pulse 2.4s ease-out infinite; }
+  @keyframes pulse { 0%{transform:scale(.6);opacity:1;} 100%{transform:scale(1.7);opacity:0;} }
+
+  /* ---- section scaffolding ---- */
+  section { padding: 84px 0; }
+  .sec-eyebrow { font-family:'JetBrains Mono', monospace; font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--signal-deep); margin-bottom: 15px; }
+  h2 { font-family:'Newsreader', serif; font-weight: 500; font-size: clamp(1.8rem, 3.6vw, 2.6rem); letter-spacing: -0.02em; line-height: 1.12; max-width: 22ch; }
+  .sec-intro { margin-top: 16px; color: var(--ink-soft); font-size: 1.06rem; max-width: 60ch; }
+
+  /* ---- pillars ---- */
+  .pillars { margin-top: 54px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  @media (max-width: 860px) { .pillars { grid-template-columns: 1fr; } }
+  .pillar {
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 32px 28px; background: var(--paper);
+    position: relative; transition: border-color .18s, box-shadow .18s, transform .18s;
+  }
+  .pillar:hover { border-color: rgba(27,110,243,0.35); box-shadow: 0 14px 40px -18px rgba(15,25,34,0.22); transform: translateY(-3px); }
+  .pillar .idx { font-family:'JetBrains Mono', monospace; font-size: 12px; color: var(--signal-deep); letter-spacing: .04em; }
+  .pillar .ico { width: 46px; height: 46px; border-radius: 11px; background: rgba(27,110,243,0.09); display: flex; align-items: center; justify-content: center; margin: 16px 0 20px; }
+  .pillar .ico svg { width: 23px; height: 23px; stroke: var(--signal-deep); }
+  .pillar h3 { font-size: 1.22rem; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 10px; }
+  .pillar p { font-size: 14.7px; color: var(--ink-soft); line-height: 1.62; }
+  .pillar .tags { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 7px; }
+  .pillar .tags span { font-family:'JetBrains Mono', monospace; font-size: 11.5px; color: var(--ink-faint); background: var(--mist); border: 1px solid var(--line); padding: 3px 9px; border-radius: 6px; }
+
+  /* ---- about ---- */
+  .about { background: var(--ink); color: #eef3f6; }
+  .about .wrap { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 58px; align-items: start; }
+  @media (max-width: 900px) { .about .wrap { grid-template-columns: 1fr; gap: 44px; } }
+  .about .sec-eyebrow { color: #6fa8ff; }
+  .about h2 { color: #fff; }
+  .about p { color: #b7c4cd; margin-top: 20px; font-size: 1.05rem; line-height: 1.72; }
+  .about p strong { color: #fff; font-weight: 600; }
+  .about .who-line { margin-top: 30px; display: flex; align-items: center; gap: 15px; }
+  .about .who-line .ph {
+    width: 54px; height: 54px; border-radius: 50%; flex: none;
+    background: linear-gradient(150deg, var(--signal), var(--signal-deep));
+    display: flex; align-items: center; justify-content: center;
+    font-family:'Newsreader', serif; font-size: 1.45rem; color: #fff; font-weight: 500;
+  }
+  .about .who-line .nm { font-weight: 600; color: #fff; font-size: 1.02rem; }
+  .about .who-line .rl { font-size: 13.5px; color: #8fa0ab; margin-top: 2px; }
+
+  .quotes-col { display: flex; flex-direction: column; gap: 16px; }
+  .qcard { background: linear-gradient(160deg, #16232e, #0d1720); border: 1px solid #22323e; border-radius: 14px; padding: 24px; }
+  .qcard .mk { font-family:'Newsreader', serif; font-size: 2.6rem; line-height: 0.5; color: rgba(111,168,255,0.35); height: 20px; }
+  .qcard p { color: #c4d0d8; font-size: 14.5px; line-height: 1.6; margin-top: 8px; }
+  .qcard .by { margin-top: 16px; font-size: 12.8px; color: #8fa0ab; }
+  .qcard .by b { color: #dbe4ea; font-weight: 600; }
+
+  /* ---- process ---- */
+  .steps { margin-top: 52px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  @media (max-width: 780px) { .steps { grid-template-columns: 1fr; } }
+  .step { padding: 34px 28px; border-right: 1px solid var(--line); position: relative; }
+  .step:last-child { border-right: 0; }
+  @media (max-width: 780px) { .step { border-right: 0; border-bottom: 1px solid var(--line); } .step:last-child { border-bottom: 0; } }
+  .step .num { font-family:'JetBrains Mono', monospace; font-size: 12.5px; color: var(--signal-deep); font-weight: 500; display: flex; align-items: center; gap: 9px; }
+  .step .num .ring { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid rgba(27,110,243,0.35); display: flex; align-items: center; justify-content: center; font-size: 11px; }
+  .step h4 { font-size: 1.12rem; font-weight: 600; margin: 16px 0 8px; letter-spacing: -0.01em; }
+  .step p { font-size: 14.3px; color: var(--ink-soft); line-height: 1.6; }
+  .step .arrow { position: absolute; right: -9px; top: 42px; width: 18px; height: 18px; background: var(--paper); border: 1px solid var(--line); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2; }
+  .step .arrow svg { width: 11px; height: 11px; stroke: var(--ink-faint); }
+  @media (max-width: 780px) { .step .arrow { display: none; } }
+
+  /* ---- contact ---- */
+  .contact { text-align: center; }
+  .contact .wrap { max-width: 720px; }
+  .contact h2 { margin: 0 auto; }
+  .contact .sec-intro { margin: 16px auto 0; }
+  .contact-box {
+    margin-top: 40px; border: 1px solid var(--line); border-radius: 16px; padding: 44px 40px;
+    background: linear-gradient(180deg, var(--mist), var(--paper));
+  }
+  .contact-box .label { font-family:'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); }
+  .contact-box .email {
+    display: inline-block; margin: 14px 0 8px; font-family:'Newsreader', serif;
+    font-size: clamp(1.4rem, 3.4vw, 2rem); font-weight: 500; color: var(--ink); letter-spacing: -0.01em;
+    border-bottom: 2px solid rgba(27,110,243,0.3); padding-bottom: 3px; transition: border-color .15s, color .15s;
+  }
+  .contact-box .email:hover { color: var(--signal-deep); border-color: var(--signal); }
+  .contact-box .sub { font-size: 14.5px; color: var(--ink-faint); margin-top: 14px; }
+  .btn-primary.lg { margin-top: 28px; padding: 15px 30px; font-size: 16px; }
+
+  /* ---- footer ---- */
+  footer { border-top: 1px solid var(--line); padding: 40px 0; }
+  footer .wrap { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  footer .brand { font-size: 15px; }
+  footer .meta { font-size: 13px; color: var(--ink-faint); text-align: right; }
+  footer .meta a:hover { color: var(--ink); }
+
+  :focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 4px; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto; } }
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="#top" class="brand"><span class="mark"></span> Moreland Data Consulting</a>
+    <div class="nav-links">
+      <a href="#pillars" class="plain">What I do</a>
+      <a href="#about" class="plain">About</a>
+      <a href="#process" class="plain">How it works</a>
+      <a href="/blog" class="blog-link plain">Blog <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+      <a href="#contact" class="nav-cta">Get in touch</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span> Available for new engagements</span>
+    <h1>Your SQL Server is slow. I make it <em>fast</em>.</h1>
+    <p class="lede">Independent SQL Server performance consulting — I find what's dragging your database down, fix it, and keep it fast as you grow. Tuning, indexing, and query optimization, done by someone who's spent a decade in production.</p>
+    <div class="hero-cta">
+      <a href="#contact" class="btn-primary">
+        Describe your problem
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <span class="avail"><span class="pulse"></span> Email me and I'll tell you honestly if I can help</span>
+    </div>
+  </div>
+</header>
+
+<section id="pillars">
+  <div class="wrap">
+    <div class="sec-eyebrow">The three pillars</div>
+    <h2>SQL Server performance, from three angles.</h2>
+    <p class="sec-intro">Nearly every performance problem I'm called in for comes down to one of these three things — or all of them at once. It's the whole focus of the practice.</p>
+    <div class="pillars">
+      <div class="pillar reveal">
+        <div class="idx">01</div>
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg></div>
+        <h3>Performance tuning</h3>
+        <p>The full-picture work: reading wait stats and execution plans to find why the server is struggling under load, then fixing the configuration, contention, and bottlenecks that show up when real traffic hits. This is where a slow, unpredictable database becomes a fast, steady one.</p>
+        <div class="tags"><span>wait stats</span><span>execution plans</span><span>blocking</span></div>
+      </div>
+      <div class="pillar reveal">
+        <div class="idx">02</div>
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10M18 15l3 3-3 3"/></svg></div>
+        <h3>Index strategy</h3>
+        <p>Indexes are the single biggest lever on SQL Server performance — and the easiest to get wrong. I design the right ones, add covering and INCLUDE columns where they earn their keep, and clear out the redundant indexes quietly dragging down every write. Done well, this is what makes reads fast without punishing everything else.</p>
+        <div class="tags"><span>covering indexes</span><span>INCLUDE columns</span><span>dedup</span></div>
+      </div>
+      <div class="pillar reveal">
+        <div class="idx">03</div>
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"/></svg></div>
+        <h3>Query optimization</h3>
+        <p>The code layer: rewriting the expensive queries, stored procedures, and views that dominate your workload. I work from the execution plan to cut the reads, kill the implicit conversions, and reshape the T-SQL so the same result costs a fraction of the resources — often the fastest win of the three.</p>
+        <div class="tags"><span>T-SQL rewrites</span><span>stored procs</span><span>plan analysis</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about" id="about">
+  <div class="wrap">
+    <div>
+      <div class="sec-eyebrow">About me</div>
+      <h2>I fell for databases, and never looked back.</h2>
+      <p>Ten years ago I was a software engineer, and my company needed someone to go deeper on the database side. I took a few classes to fill the gap — and fell for it almost immediately. Databases are genuinely complicated, but they're <strong>objective</strong>: there's a real answer under the problem, and the work is finding it. That's the part I loved then, and still love now.</p>
+      <p>A decade later, I've spent that time going as deep as I can — <strong>tuning performance, designing indexing, and optimizing queries on production SQL Server running real, high-transaction workloads</strong> where slow meant lost revenue. I still treat every engagement the same way I treated that first class: there's an answer in here, and I'm going to find it.</p>
+      <div class="who-line">
+        <div class="ph">JM</div>
+        <div>
+          <div class="nm">Jesse Moreland</div>
+          <div class="rl">Principal · Moreland Data Consulting LLC</div>
+        </div>
+      </div>
+    </div>
+    <div class="quotes-col">
+      <div class="qcard reveal">
+        <div class="mk">&ldquo;</div>
+        <p>Excellent work cleaning up the database and consolidating functionality down to a single point, so we don't have duplication all over. He's making real progress toward maintainable code. He should continue being a DBA bad ass.</p>
+        <div class="by"><b>Senior Engineer</b> · E-commerce marketplace platform</div>
+      </div>
+      <div class="qcard reveal">
+        <div class="mk">&ldquo;</div>
+        <p>Jesse is very responsive to any database issues I have. He's always looking for ways to optimize our system and track down problem spots.</p>
+        <div class="by"><b>Backend Developer</b> · Marketplace SaaS</div>
+      </div>
+      <div class="qcard reveal">
+        <div class="mk">&ldquo;</div>
+        <p>I was really impressed with how he built our workspace query-performance improvements in an extensible fashion, allowing more optimizations to be added later. Well implemented.</p>
+        <div class="by"><b>Senior Software Engineer</b> · E-commerce platform</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="process">
+  <div class="wrap">
+    <div class="sec-eyebrow">How it works</div>
+    <h2>Simple to start. No commitment to find out if I can help.</h2>
+    <p class="sec-intro">No forms, no sales funnel — just an email and an honest answer.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="num"><span class="ring">1</span> Email</div>
+        <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+        <h4>Tell me what's going on</h4>
+        <p>Send me a short email describing the problem — the symptom, roughly your scale, and how urgent it is. That's all I need to start.</p>
+      </div>
+      <div class="step">
+        <div class="num"><span class="ring">2</span> Talk</div>
+        <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+        <h4>I'll tell you if I can help</h4>
+        <p>I'll email you back with an honest read on whether it's something I can fix. If it is, we'll schedule a short call to talk through it in more detail.</p>
+      </div>
+      <div class="step">
+        <div class="num"><span class="ring">3</span> Assess</div>
+        <h4>A scoped assessment</h4>
+        <p>From there, most engagements start with a fixed-price performance assessment — I dig into your server and hand you a prioritized set of fixes, before any bigger commitment.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div class="wrap">
+    <div class="sec-eyebrow" style="text-align:center;">Get in touch</div>
+    <h2>Tell me what's slow.</h2>
+    <p class="sec-intro">A query that's dragging, a database that's buckling under load, indexing you suspect is a mess — send a short description and I'll tell you honestly whether I can help.</p>
+    <div class="contact-box">
+      <div class="label">Email direct</div>
+      <a href="mailto:jesse@morelanddataconsulting.com?subject=SQL%20Server%20performance%20help&body=Here's%20what's%20happening%3A%0A%0AScale%2Fenvironment%3A%0A%0AUrgency%3A" class="email">jesse@morelanddataconsulting.com</a>
+      <div class="sub">Include the symptom, roughly your scale, and how urgent it is — and I'll get back to you.</div>
+      <div>
+        <a href="mailto:jesse@morelanddataconsulting.com?subject=SQL%20Server%20performance%20help" class="btn-primary lg">
+          Start the conversation
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <a href="#top" class="brand"><span class="mark"></span> Moreland Data Consulting</a>
+    <div class="meta">
+      SQL Server performance consulting · Redmond, Oregon<br>
+      <a href="mailto:jesse@morelanddataconsulting.com">jesse@morelanddataconsulting.com</a> · <a href="/blog">Blog</a><br>
+      <span style="opacity:.7;">© <span id="yr"></span> Moreland Data Consulting LLC</span>
+    </div>
+  </div>
+</footer>
+
+<script is:inline>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
