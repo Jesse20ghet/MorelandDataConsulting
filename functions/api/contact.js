@@ -52,6 +52,7 @@ export async function onRequestPost(context) {
   if (!tsData.success) {
     const codes = tsData['error-codes'] || [];
     const s = env.TURNSTILE_SECRET_KEY || '';
+    const pub = env.PUBLIC_TURNSTILE_SITE_KEY || '';
     const secretShape = {
       configured: !!s,
       length: s.length,
@@ -60,12 +61,21 @@ export async function onRequestPost(context) {
       hasSurroundingWhitespace: s !== s.trim(),
       tokenLength: (turnstileToken || '').length,
     };
+    const siteKeyShape = {
+      configured: !!pub,
+      length: pub.length,
+      startsWith: pub.slice(0, 6),
+      endsWith: pub.slice(-4),
+    };
+    const secretEqualsSiteKey = !!s && s === pub;
     console.error('Turnstile verify failed:', codes, secretShape, 'raw:', rawText);
     return json({
       error: 'Challenge failed. Please try again.',
       debug: {
         turnstileErrors: codes,
         secretShape,
+        siteKeyShape,
+        secretEqualsSiteKey,
         rawResponse: rawText,
         rawStatus: tsRes.status,
       },
