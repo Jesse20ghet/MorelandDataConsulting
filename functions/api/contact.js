@@ -41,9 +41,14 @@ export async function onRequestPost(context) {
     method: 'POST',
     body: tsForm,
   });
-  const tsData = await tsRes.json().catch(() => ({ success: false }));
+  const tsData = await tsRes.json().catch(() => ({ success: false, 'error-codes': ['parse-error'] }));
   if (!tsData.success) {
-    return json({ error: 'Challenge failed. Please try again.' }, 400);
+    const codes = tsData['error-codes'] || [];
+    console.error('Turnstile verify failed:', codes, 'secret set?', !!env.TURNSTILE_SECRET_KEY);
+    return json({
+      error: 'Challenge failed. Please try again.',
+      debug: { turnstileErrors: codes, secretConfigured: !!env.TURNSTILE_SECRET_KEY },
+    }, 400);
   }
 
   const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
