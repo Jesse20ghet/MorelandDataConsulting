@@ -4,7 +4,7 @@ Your homepage and blog now build together as ONE site.
 - Homepage: src/../public/index.html  ->  served at /
 - Blog:     src/pages/blog/           ->  served at /blog
 
-## Setup (first time)
+## Setup (first time) 
 Install Node.js 18+ (any 18+; you have 22). Then in this folder:
     npm install
 
