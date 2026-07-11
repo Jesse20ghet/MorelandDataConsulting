@@ -1,4 +1,5 @@
 ---
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -10,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style is:global>
   :root {
     --ink: #0f1922;
@@ -195,6 +197,30 @@
   footer .meta { font-size: 13px; color: var(--ink-faint); text-align: right; }
   footer .meta a:hover { color: var(--ink); }
 
+  /* ---- contact form ---- */
+  .contact-form { display: flex; flex-direction: column; gap: 16px; text-align: left; margin-top: 28px; }
+  .form-row { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); font-weight: 500; }
+  .form-input, .form-textarea {
+    font-family: 'Inter', system-ui, sans-serif; font-size: 15px; color: var(--ink); background: var(--paper);
+    border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; width: 100%;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .form-input:focus, .form-textarea:focus {
+    outline: none; border-color: var(--signal); box-shadow: 0 0 0 3px rgba(27,110,243,0.15);
+  }
+  .form-textarea { resize: vertical; min-height: 130px; line-height: 1.55; }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--ink-faint); }
+  .hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .form-actions { display: flex; justify-content: flex-start; margin-top: 4px; }
+  .form-actions .btn-primary { cursor: pointer; border: none; font-family: inherit; }
+  .form-actions .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: 0 1px 2px rgba(11,79,192,0.2); }
+  .form-status { font-size: 14.5px; padding: 12px 14px; border-radius: 8px; text-align: left; }
+  .form-status:empty { display: none; padding: 0; }
+  .form-success { background: rgba(23,145,107,0.08); color: #0f6f4f; border: 1px solid rgba(23,145,107,0.25); }
+  .form-error { background: rgba(220,38,38,0.06); color: #b91c1c; border: 1px solid rgba(220,38,38,0.22); }
+  .cf-turnstile { display: flex; justify-content: flex-start; min-height: 65px; }
+
   :focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 4px; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto; } }
   .reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
@@ -330,15 +356,34 @@
     <h2>Tell me what's slow.</h2>
     <p class="sec-intro">A query that's dragging, a database that's buckling under load, indexing you suspect is a mess — send a short description and I'll tell you honestly whether I can help.</p>
     <div class="contact-box">
-      <div class="label">Email direct</div>
-      <a href="mailto:jesse@morelanddataconsulting.com?subject=SQL%20Server%20performance%20help&body=Here's%20what's%20happening%3A%0A%0AScale%2Fenvironment%3A%0A%0AUrgency%3A" class="email">jesse@morelanddataconsulting.com</a>
+      <div class="label">Send a message</div>
       <div class="sub">Include the symptom, roughly your scale, and how urgent it is — and I'll get back to you.</div>
-      <div>
-        <a href="mailto:jesse@morelanddataconsulting.com?subject=SQL%20Server%20performance%20help" class="btn-primary lg">
-          Start the conversation
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-      </div>
+      <form id="contact-form" class="contact-form" novalidate>
+        <div class="form-row">
+          <label for="cf-name" class="form-label">Name</label>
+          <input id="cf-name" name="name" type="text" required autocomplete="name" maxlength="200" class="form-input" />
+        </div>
+        <div class="form-row">
+          <label for="cf-email" class="form-label">Email</label>
+          <input id="cf-email" name="email" type="email" required autocomplete="email" maxlength="200" class="form-input" />
+        </div>
+        <div class="form-row">
+          <label for="cf-message" class="form-label">What's slow?</label>
+          <textarea id="cf-message" name="message" rows="5" required maxlength="5000" class="form-textarea" placeholder="Symptom, scale, urgency — the shorter the better."></textarea>
+        </div>
+        <div class="hp-field" aria-hidden="true">
+          <label for="cf-hp">Leave this field empty</label>
+          <input id="cf-hp" type="text" name="company_website" tabindex="-1" autocomplete="off" />
+        </div>
+        <div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary lg" id="cf-submit">
+            <span id="cf-submit-label">Send message</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+        <div class="form-status" id="cf-status" role="status" aria-live="polite"></div>
+      </form>
     </div>
   </div>
 </section>
@@ -360,6 +405,55 @@
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
   }, { threshold: 0.15 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  const form = document.getElementById('contact-form');
+  const submitBtn = document.getElementById('cf-submit');
+  const submitLabel = document.getElementById('cf-submit-label');
+  const status = document.getElementById('cf-status');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.textContent = '';
+      status.className = 'form-status';
+      submitBtn.disabled = true;
+      submitLabel.textContent = 'Sending...';
+
+      const fd = new FormData(form);
+      const payload = {
+        name: fd.get('name'),
+        email: fd.get('email'),
+        message: fd.get('message'),
+        company_website: fd.get('company_website'),
+        'cf-turnstile-response': fd.get('cf-turnstile-response'),
+      };
+
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          form.style.display = 'none';
+          status.textContent = "Message sent — I'll get back to you.";
+          status.className = 'form-status form-success';
+        } else {
+          const err = await res.json().catch(() => ({}));
+          status.textContent = err.error || 'Something went wrong. Please try again in a moment.';
+          status.className = 'form-status form-error';
+          submitBtn.disabled = false;
+          submitLabel.textContent = 'Send message';
+          if (window.turnstile) window.turnstile.reset();
+        }
+      } catch (err) {
+        status.textContent = 'Network error. Please try again.';
+        status.className = 'form-status form-error';
+        submitBtn.disabled = false;
+        submitLabel.textContent = 'Send message';
+        if (window.turnstile) window.turnstile.reset();
+      }
+    });
+  }
 </script>
 </body>
 </html>
