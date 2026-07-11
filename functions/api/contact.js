@@ -44,10 +44,19 @@ export async function onRequestPost(context) {
   const tsData = await tsRes.json().catch(() => ({ success: false, 'error-codes': ['parse-error'] }));
   if (!tsData.success) {
     const codes = tsData['error-codes'] || [];
-    console.error('Turnstile verify failed:', codes, 'secret set?', !!env.TURNSTILE_SECRET_KEY);
+    const s = env.TURNSTILE_SECRET_KEY || '';
+    const secretShape = {
+      configured: !!s,
+      length: s.length,
+      startsWith: s.slice(0, 6),
+      endsWith: s.slice(-4),
+      hasSurroundingWhitespace: s !== s.trim(),
+      tokenLength: (turnstileToken || '').length,
+    };
+    console.error('Turnstile verify failed:', codes, secretShape);
     return json({
       error: 'Challenge failed. Please try again.',
-      debug: { turnstileErrors: codes, secretConfigured: !!env.TURNSTILE_SECRET_KEY },
+      debug: { turnstileErrors: codes, secretShape },
     }, 400);
   }
 
