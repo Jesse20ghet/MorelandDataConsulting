@@ -1,40 +1,123 @@
 ---
 title: "Your text search is slow"
 description: "You're using a wildcard and now SQL isn't using your index"
-pubDate: 2026-07-10
+pubDate: 2026-07-11
 draft: false
 ---
 
-![Test Image](/images/test-image.png)
+Have you ever tried to index a text field but SQL server just won't use it? In this blog post, we're going to talk about how to solve that problem using a full text catalog.
 
-You didn't deploy anything. No one changed the query. The data didn't balloon overnight. And yet this morning, a stored procedure that used to run in 200 milliseconds is taking eight seconds, and it's dragging everything behind it.
+## Setting the scene
 
-This is one of the most common calls I get, and the cause is usually the same: **the execution plan changed**, and not in your favor.
+I'm using StackOverflow 2013 database provided by Brent Ozar and the team at Stack Overflow. You can follow his blog post here to get it yourself: https://www.brentozar.com/archive/2015/10/how-to-download-the-stack-overflow-database-via-bittorrent/ and I want to be able to search for posts by title. Lets just say we want to just get the first 10 posts with a title that matches our query string.
 
-## What actually happened
+Lets take a look at the Posts table
 
-SQL Server decides *how* to run a query — which indexes to use, which join strategy, how much memory to grant — based on statistics about your data. When those statistics update (which SQL Server does automatically as data changes), it throws out the cached plan and builds a new one the next time the query runs.
+![Posts](/images/posts-table.png)
 
-Most of the time, the new plan is fine. Occasionally, SQL Server picks a plan optimized for the wrong shape of data — a classic example being **parameter sniffing**, where the plan gets built for a parameter value that isn't representative of typical use. The query that got compiled for "find one customer" suddenly gets reused for "find every customer in California," and the plan that was perfect for the first case is a disaster for the second.
+Along with various other fields, you can see that Posts has title field with a nullable nvarchar(250). Lets turn on Include Actual Execution Plan and run our query(Select *!?, please forgive me. This is just a demo!):
+```
+SELECT top 10 p.Title, * 
+FROM Posts p 
+WHERE p.Title like 'Sql Server%'
+```
+And we end up with a clustered index scan because the table only has one index, a clustered index on the Posts table.
+![Clustered index scan](/images/posts-table-clustered-index.png)
 
-## How to confirm it in a few minutes
+This results in
+<br> CPU Time: 0ms
+<br>Query time: 49ms
+<br>Logical reads: 1462
 
-Before changing anything, verify that's what you're looking at:
+We can do better! Lets add an index to the posts table that covers this title column.
+```
+CREATE INDEX IX_Title 
+ON Posts(Title)
+```
+And now lets run our query again
 
-- Pull the current execution plan for the slow query and compare it to what it *should* look like. A plan doing a scan where it used to do a seek is a strong tell.
-- Check when statistics last updated on the tables involved. If it lines up with when things got slow, that's your smoking gun.
-- Look at whether the query is sensitive to which parameter value compiled it — running it with different parameters and watching the plan tells you a lot.
+![Posts table query with lookups](/images/posts-table-query-with-lookups.png)
 
-## The fix depends on the cause
+This results in
+<br> CPU Time: 0ms
+<br>Query time: 53ms
+<br>Logical reads: 44
 
-Once you've confirmed it, the options range from targeted to blunt:
+Yes this results in some key lookups that we could get rid of by including other fields in the index but we're no longer scanning the clustered index and logical reads are a fraction of what they were before!
 
-- Update statistics so SQL Server has a current picture of the data.
-- For parameter sniffing specifically, there are several approaches — `OPTIMIZE FOR`, recompile hints, or restructuring the query — each with tradeoffs depending on how the query is actually used.
-- Sometimes the right answer is a better index that makes the plan choice matter less.
+But what if we change our query a bit? Lets include a wildcard at the start of our query text instead of just the end.
+```
+SELECT top 10 p.Title, * 
+FROM Posts p 
+WHERE p.Title like '%Sql Server%'
+```
 
-The wrong move is to blindly clear the plan cache and hope — that might fix it for an hour until the same bad plan gets picked again.
+![Clustered Index Scan again](/images/clustered-index-scan-again.png)
 
----
+Oh no! We're back to a clustered index scan. But we have a covering index don't we? Why isn't SQL Server choosing to use it? Stupid SQL Server. Lets force it!
+```
+SELECT top 10 p.Title, * 
+FROM Posts p WITH(INDEX(IX_Title))
+WHERE p.Title like '%Sql Server%'
+```
 
-If this sounds like what's happening on your server and you'd rather not chase it alone, [tell me what's going on](/#contact) — this is squarely the kind of thing I help with.
+![Forced Index](/images/forced-index.png)
+
+This results in
+<br> CPU Time: 1609ms
+<br>Query time: 1685ms
+<br>Logical reads: 14208
+
+Wow. An index scan(not a seek like before). Maybe SQL Server knows what's its doing when it decides to scan the clustered index instead of the index. But why? Why is this not working? Well the answer is that when you have a wildcard at the start of your query, it stops SQL from being able to index seek directly to the node in the B-tree then read sequentially. 
+
+Well you can think of your index like this. An ordered list starting with NULL then alphabetically ordered. And when its like this, SQL can seek to the `Sql Server` node in the index and read it. But when you have a wildcard at the beginning, `Sql Server` doesn't know where to start.
+```
+SELECT TOP 100 p.Title
+FROM Posts p
+WHERE p.Title IS NOT NULL -- Get results that are not null
+ORDER BY p.Title
+```
+
+## Full Text Catalogs
+
+The solution to this is a full text catalog. Full text catalogs let you search through all the text in a column quickly and the best thing about them, wildcards work!
+
+First things first, run this to make sure you have this feature installed and it should result in a 1. If it doesn't you'll need to install that feature which is outside the scope of this blog post.
+```
+SELECT SERVERPROPERTY('IsFullTextInstalled');
+```
+
+Now lets create a full text catalog. This will create a container where your catalogs will live. Specifying `AS DEFAULT` makes it so that when you create full text indexes without specifying they catalog, they'll end up in here.
+```
+CREATE FULLTEXT CATALOG ftCatalog AS DEFAULT;
+```
+
+Now that we have a place to create the full text indexes, lets create one! The only gotcha here is that the table you're creating the full text index on needs to have a unique index.
+```
+CREATE FULLTEXT INDEX ON dbo.Posts (Title)
+    KEY INDEX PK_Posts_Id   -- name of the unique index (PK)
+    ON ftCatalog
+    WITH CHANGE_TRACKING AUTO;    -- keeps index updated automatically
+```
+
+And now that your full text is created, we can query it! You just need to change the syntax a bit. Using the CONTAINS function tells SQL to use the full text index
+```
+SELECT top 10 p.Title, * 
+FROM Posts p 
+--WHERE p.Title like '%Sql Server%'
+WHERE CONTAINS(p.Title, '"Sql Server"')
+```
+
+![Forced Index](/images/full-text-search-query-plan.png)
+
+This results in
+<br> CPU Time: 16ms
+<br>Query time: 49ms
+<br>Logical reads: 45
+
+Now you're off and rolling! You've successfully created a text catalog and efficiently queried it! Congratulations!
+
+
+## Working with me
+
+If you found this blog post helpful and would like to work with me, [shoot me an email](/#contact)!
