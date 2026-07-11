@@ -12,13 +12,8 @@ export async function onRequestPost(context) {
     name,
     email,
     message,
-    company_website,
     'cf-turnstile-response': turnstileToken,
   } = body || {};
-
-  if (company_website) {
-    return json({ ok: true });
-  }
 
   if (!name || !email || !message) {
     return json({ error: 'Please fill in every field.' }, 400);

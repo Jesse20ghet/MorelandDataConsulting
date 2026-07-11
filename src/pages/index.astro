@@ -211,7 +211,6 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '1x0000000
   }
   .form-textarea { resize: vertical; min-height: 130px; line-height: 1.55; }
   .form-input::placeholder, .form-textarea::placeholder { color: var(--ink-faint); }
-  .hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   .form-actions { display: flex; justify-content: flex-start; margin-top: 4px; }
   .form-actions .btn-primary { cursor: pointer; border: none; font-family: inherit; }
   .form-actions .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: 0 1px 2px rgba(11,79,192,0.2); }
@@ -371,10 +370,6 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '1x0000000
           <label for="cf-message" class="form-label">What's slow?</label>
           <textarea id="cf-message" name="message" rows="5" required maxlength="5000" class="form-textarea" placeholder="Symptom, scale, urgency — the shorter the better."></textarea>
         </div>
-        <div class="hp-field" aria-hidden="true">
-          <label for="cf-hp">Leave this field empty</label>
-          <input id="cf-hp" type="text" name="company_website" tabindex="-1" autocomplete="off" />
-        </div>
         <div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div>
         <div class="form-actions">
           <button type="submit" class="btn-primary lg" id="cf-submit">
@@ -382,8 +377,8 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '1x0000000
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </button>
         </div>
-        <div class="form-status" id="cf-status" role="status" aria-live="polite"></div>
       </form>
+      <div class="form-status" id="cf-status" role="status" aria-live="polite"></div>
     </div>
   </div>
 </section>
@@ -423,7 +418,6 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '1x0000000
         name: fd.get('name'),
         email: fd.get('email'),
         message: fd.get('message'),
-        company_website: fd.get('company_website'),
         'cf-turnstile-response': fd.get('cf-turnstile-response'),
       };
 
