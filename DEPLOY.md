@@ -5,7 +5,7 @@ your existing Cloudflare Pages project at this build. Two paths — pick ONE.
 
 Your domain, DNS, and email routing all stay exactly as they are. This only
 changes what content the site serves. Email (jesse@morelanddataconsulting.com)
-is unaffected.
+is unaffected. 
 
 --------------------------------------------------------------------
 PATH A — Git-connected (recommended: rebuilds automatically on every change)

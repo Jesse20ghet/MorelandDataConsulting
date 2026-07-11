@@ -1,5 +1,5 @@
 ---
-title: "Why LIKE '%something%' is slow — and how full-text search fixes it"
+title: "Why is my text search slow?"
 description: "Leading wildcards break index seeks. Here's why, and how a full-text catalog solves it."
 pubDate: 2026-07-11
 draft: false
