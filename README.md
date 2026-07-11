@@ -23,7 +23,7 @@ Add a Markdown file to `src/content/blog/`, e.g. `my-post.md`:
 - Filename = URL slug:  my-post.md  ->  /blog/my-post/
 - draft: true  keeps a post out of the build while you work on it.
 
-## Editing the HOMEPAGE
+## Editing the HOMEPAGE  
 The homepage is public/index.html — plain HTML, edit it directly.
 (It is intentionally NOT an Astro page, so it stays exactly as designed.)
 
