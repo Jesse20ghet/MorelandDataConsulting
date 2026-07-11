@@ -32,16 +32,23 @@ export async function onRequestPost(context) {
     return json({ error: 'Please complete the challenge.' }, 400);
   }
   const ip = request.headers.get('CF-Connecting-IP') || '';
-  const tsForm = new FormData();
-  tsForm.append('secret', env.TURNSTILE_SECRET_KEY);
-  tsForm.append('response', turnstileToken);
-  if (ip) tsForm.append('remoteip', ip);
+  const tsBody = new URLSearchParams();
+  tsBody.append('secret', env.TURNSTILE_SECRET_KEY);
+  tsBody.append('response', turnstileToken);
+  if (ip) tsBody.append('remoteip', ip);
 
   const tsRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
-    body: tsForm,
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: tsBody.toString(),
   });
-  const tsData = await tsRes.json().catch(() => ({ success: false, 'error-codes': ['parse-error'] }));
+  const rawText = await tsRes.text();
+  let tsData;
+  try {
+    tsData = JSON.parse(rawText);
+  } catch {
+    tsData = { success: false, 'error-codes': ['parse-error'] };
+  }
   if (!tsData.success) {
     const codes = tsData['error-codes'] || [];
     const s = env.TURNSTILE_SECRET_KEY || '';
@@ -53,10 +60,15 @@ export async function onRequestPost(context) {
       hasSurroundingWhitespace: s !== s.trim(),
       tokenLength: (turnstileToken || '').length,
     };
-    console.error('Turnstile verify failed:', codes, secretShape);
+    console.error('Turnstile verify failed:', codes, secretShape, 'raw:', rawText);
     return json({
       error: 'Challenge failed. Please try again.',
-      debug: { turnstileErrors: codes, secretShape },
+      debug: {
+        turnstileErrors: codes,
+        secretShape,
+        rawResponse: rawText,
+        rawStatus: tsRes.status,
+      },
     }, 400);
   }
 
