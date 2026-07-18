@@ -15,7 +15,7 @@ I'm using StackOverflow 2013 database provided by Brent Ozar and the team at Sta
 
 Let's take a look at the Posts table
 
-![Posts table columns showing Title as nvarchar(250)](/images/posts-table.png)
+![Posts table columns showing Title as nvarchar(250)](/images/your-text-search-is-slow/posts-table.png)
 
 Along with various other fields, you can see that Posts has title field with a nullable nvarchar(250). Let's turn on the actual execution plan and run our query (yes, `SELECT *` — forgive me, this is a demo):
 ```sql
@@ -26,7 +26,7 @@ WHERE p.Title like 'Sql Server%'
 (In production I'd add an `ORDER BY` — with `TOP 10` and no ordering, "which 10" is nondeterministic. For a demo we just want to see the plan.)
 
 And we end up with a clustered index scan because the table only has one index, a clustered index on the Posts table.
-![Execution plan: clustered index scan on Posts, cost 100%](/images/posts-table-clustered-index.png)
+![Execution plan: clustered index scan on Posts, cost 100%](/images/your-text-search-is-slow/posts-table-clustered-index.png)
 
 This results in
 ```
@@ -42,7 +42,7 @@ ON Posts(Title)
 ```
 And now let's run our query again
 
-![Execution plan: index seek on IX_Title with key lookups back to the clustered index](/images/posts-table-query-with-lookups.png)
+![Execution plan: index seek on IX_Title with key lookups back to the clustered index](/images/your-text-search-is-slow/posts-table-query-with-lookups.png)
 
 This results in
 ```
@@ -60,7 +60,7 @@ FROM Posts p
 WHERE p.Title like '%Sql Server%'
 ```
 
-![Execution plan: clustered index scan returns after adding a leading wildcard](/images/clustered-index-scan-again.png)
+![Execution plan: clustered index scan returns after adding a leading wildcard](/images/your-text-search-is-slow/clustered-index-scan-again.png)
 
 Oh no! We're back to a clustered index scan. But we have a covering index don't we? Why isn't SQL Server choosing to use it? Stupid SQL Server. Let's force it!
 ```sql
@@ -69,7 +69,7 @@ FROM Posts p WITH(INDEX(IX_Title))
 WHERE p.Title like '%Sql Server%'
 ```
 
-![Execution plan: forced IX_Title results in an index scan (not a seek), 14,208 logical reads](/images/forced-index.png)
+![Execution plan: forced IX_Title results in an index scan (not a seek), 14,208 logical reads](/images/your-text-search-is-slow/forced-index.png)
 
 This results in
 ```
@@ -127,7 +127,7 @@ FROM Posts p
 WHERE CONTAINS(p.Title, '"Sql Server"')
 ```
 
-![Execution plan: CONTAINS query uses the full-text index with 45 logical reads](/images/full-text-search-query-plan.png)
+![Execution plan: CONTAINS query uses the full-text index with 45 logical reads](/images/your-text-search-is-slow/full-text-search-query-plan.png)
 
 This results in
 ```
