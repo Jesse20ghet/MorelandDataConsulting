@@ -1,5 +1,40 @@
 ---
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
+
+const businessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  '@id': 'https://morelanddataconsulting.com/#business',
+  name: 'Moreland Data Consulting',
+  description:
+    'Independent SQL Server performance consulting: performance tuning, index strategy, and query optimization for production databases.',
+  url: 'https://morelanddataconsulting.com/',
+  logo: 'https://morelanddataconsulting.com/favicon.svg',
+  image: 'https://morelanddataconsulting.com/images/og-default.png',
+  email: 'jesse@morelanddataconsulting.com',
+  priceRange: '$$',
+  founder: {
+    '@type': 'Person',
+    name: 'Jesse Moreland',
+  },
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Redmond',
+    addressRegion: 'OR',
+    addressCountry: 'US',
+  },
+  areaServed: {
+    '@type': 'Country',
+    name: 'United States',
+  },
+  knowsAbout: [
+    'SQL Server performance tuning',
+    'Database index strategy',
+    'Query optimization',
+    'Execution plan analysis',
+  ],
+  serviceType: 'SQL Server Performance Consulting',
+};
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -17,6 +52,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '1x0000000
 <meta property="og:image" content="https://morelanddataconsulting.com/images/og-default.png">
 <meta property="og:site_name" content="Moreland Data Consulting">
 <meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json" set:html={JSON.stringify(businessSchema)} />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">

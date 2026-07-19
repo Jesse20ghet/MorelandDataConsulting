@@ -1,9 +1,11 @@
 ---
 title: "Your SQL Server Is Slow. The First 4 Things I Check"
-description: "Your SQL Server is slow and you just don't know why. The slowness isn't a mystery, it's a checklist. There IS a reason it's slow. Here are the first 4 things I would check."
+description: "Is your SQL Server slow? It's not a mystery, it's a checklist. The first 4 things I check on any slow server: wait stats, blocking, top queries, and indexing."
 pubDate: 2026-07-11
 draft: false
 ---
+
+Is your SQL Server slow and you don't know why? Good news: slow is almost never a mystery — it's a checklist. Before you start randomly adding indexes or throwing hardware at the problem, here are the first four things I check on any server that's dragging, and the free scripts I use to check them.
 
 A set of scripts I use is the [First Responder Kit](https://github.com/BrentOzarULTD/SQL-Server-First-Responder-Kit/blob/main/README.md). These scripts just make your life easier. In my day job, I have these scripts sitting in their own database and I call them like this: `DBATools..SP_BlitzFirst`
 
@@ -17,7 +19,7 @@ SP_BlitzFirst @Seconds = 5, @ExpertMode = 1
 
  This will take 5 seconds to run and generate a bunch of different result sets. For wait stats, I want you to look at the second set of results.
 
-![Wait Stats](/images/sql-server-is-slow-first-four-things/wait-stats.png)
+![sp_BlitzFirst wait stats output showing MEMORY_ALLOCATION_EXT, HADR_SYNC_COMMIT, and PAGELATCH_EX waits on a SQL Server](/images/sql-server-is-slow-first-four-things/wait-stats.png)
 
 Here you can see what is causing the most contention, in this server above, the biggest number of waits is coming from `MEMORY_ALLOCATION_EXT` which is a bad example. Other scripts exclude this but this one means queries are waiting on memory to be allocated. Since nearly every query allocates memory, it's best to ignore it.
 
@@ -44,7 +46,7 @@ EXEC DBATools..Sp_BlitzWho
 from the [First Responder Kit](https://github.com/BrentOzarULTD/SQL-Server-First-Responder-Kit/blob/main/README.md) because it filters out the noise.
 
 Here is a result set of running this on a server I manage. I've blurred a few things for privacy's sake.
-![Blocking Contention](/images/sql-server-is-slow-first-four-things/blocking-contention.png)
+![sp_BlitzWho output showing running SQL Server sessions, their durations, session IDs, and active blocking](/images/sql-server-is-slow-first-four-things/blocking-contention.png)
 
 You can see a bunch of goodies this script gives us. How long things are running for, their session id, and if they're actively being blocked by another session.
 
@@ -78,7 +80,9 @@ SELECT * FROM Users where Location = 'Seattle, Washington'
 ```
 
 And you can see it tells you a bunch about different problems the server is having
-![Missing Indexes](/images/sql-server-is-slow-first-four-things/missing-indexes.png)
+![sp_BlitzIndex output highlighting missing indexes on the StackOverflow2013 database](/images/sql-server-is-slow-first-four-things/missing-indexes.png)
+
+Sometimes the problem isn't a missing index at all — it's a query written in a way that *can't* use the index you already have. A classic example is a text search with a leading wildcard. I wrote a full walkthrough on [why your text search is slow and how a full-text catalog fixes it](/blog/your-text-search-is-slow/).
 
 ## Working with me
 
