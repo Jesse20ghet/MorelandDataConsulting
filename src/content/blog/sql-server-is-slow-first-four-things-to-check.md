@@ -1,7 +1,7 @@
 ---
 title: "Your SQL Server Is Slow. The First 4 Things I Check"
 description: "Is your SQL Server slow? It's not a mystery, it's a checklist. The first 4 things I check on any slow server: wait stats, blocking, top queries, and indexing."
-pubDate: 2026-07-11
+pubDate: 2026-07-18
 draft: false
 ---
 
