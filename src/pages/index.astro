@@ -179,6 +179,31 @@ const businessSchema = {
   .pillar .tags { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 7px; }
   .pillar .tags span { font-family:'JetBrains Mono', monospace; font-size: 11.5px; color: var(--ink-faint); background: var(--mist); border: 1px solid var(--line); padding: 3px 9px; border-radius: 6px; }
 
+  /* ---- engagements / pricing ---- */
+  .tiers { margin-top: 54px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; align-items: stretch; }
+  @media (max-width: 860px) { .tiers { grid-template-columns: 1fr; } }
+  .tier {
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 32px 28px; background: var(--paper);
+    position: relative; display: flex; flex-direction: column; transition: border-color .18s, box-shadow .18s, transform .18s;
+  }
+  .tier:hover { border-color: rgba(27,110,243,0.35); box-shadow: 0 14px 40px -18px rgba(15,25,34,0.22); transform: translateY(-3px); }
+  .tier.featured { border-color: var(--signal); box-shadow: 0 14px 40px -20px rgba(27,110,243,0.45); }
+  .tier-badge {
+    position: absolute; top: -11px; left: 28px; background: var(--signal); color: #fff;
+    font-family:'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 6px;
+  }
+  .tier h3 { font-size: 1.22rem; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 6px; }
+  .tier .price { font-family:'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; color: var(--signal-deep); margin-bottom: 16px; }
+  .tier p { font-size: 14.7px; color: var(--ink-soft); line-height: 1.62; flex: 1; }
+  .tier-cta {
+    margin-top: 22px; font-weight: 600; font-size: 14.5px; color: #fff !important; background: var(--signal);
+    padding: 11px 18px; border-radius: 9px; text-align: center; transition: background .15s, transform .15s;
+  }
+  .tier-cta:hover { background: var(--signal-deep); transform: translateY(-1px); text-decoration: none; }
+  .tier-cta.plain-cta { background: transparent; color: var(--signal-deep) !important; border: 1px solid var(--line); }
+  .tier-cta.plain-cta:hover { background: var(--mist); border-color: var(--signal); }
+
   /* ---- about ---- */
   .about { background: var(--ink); color: #eef3f6; }
   .about .wrap { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 58px; align-items: start; }
@@ -323,6 +348,35 @@ const businessSchema = {
   </div>
 </section>
 
+<section id="engagements">
+  <div class="wrap">
+    <div class="sec-eyebrow">Working together</div>
+    <h2>Start with a free look under the hood.</h2>
+    <p class="sec-intro">Every engagement starts the same way — I find out what's actually wrong before anyone talks about a bigger commitment. The first step costs you nothing.</p>
+    <div class="tiers">
+      <div class="tier featured reveal">
+        <div class="tier-badge">Start here</div>
+        <h3>Performance Health Check</h3>
+        <div class="price">Free</div>
+        <p>A no-commitment diagnostic. I get into your server, read the wait stats and execution plans, and tell you exactly what's slow and why — with a prioritized list of what to fix. The findings are yours to keep, whether or not we go further.</p>
+        <a href="#contact" class="tier-cta">Claim your health check →</a>
+      </div>
+      <div class="tier reveal">
+        <h3>Performance Fix</h3>
+        <div class="price">Fixed scope</div>
+        <p>The hands-on work: fixing what the health check turns up. Tuning configuration and contention, redesigning indexes, and rewriting the queries eating your server. Scoped and priced up front, so you know the cost before I start.</p>
+        <a href="#contact" class="tier-cta plain-cta">Talk through a fix →</a>
+      </div>
+      <div class="tier reveal">
+        <h3>Ongoing Advisory</h3>
+        <div class="price">Monthly retainer</div>
+        <p>For teams that want a SQL Server expert on call. Ongoing tuning, index and schema review as you ship new features, and a fast answer when something starts to drag. Monthly, cancel anytime.</p>
+        <a href="#contact" class="tier-cta plain-cta">Let's talk →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="about" id="about">
   <div class="wrap">
     <div>
@@ -377,9 +431,9 @@ const businessSchema = {
         <p>I'll email you back with an honest read on whether it's something I can fix. If it is, we'll schedule a short call to talk through it in more detail.</p>
       </div>
       <div class="step">
-        <div class="num"><span class="ring">3</span> Assess</div>
-        <h4>A scoped assessment</h4>
-        <p>From there, most engagements start with a fixed-price performance assessment — I dig into your server and hand you a prioritized set of fixes, before any bigger commitment.</p>
+        <div class="num"><span class="ring">3</span> Check</div>
+        <h4>A free health check</h4>
+        <p>From there, every engagement starts with a free performance health check — I dig into your server and hand you a prioritized set of fixes, before any bigger commitment.</p>
       </div>
     </div>
   </div>
