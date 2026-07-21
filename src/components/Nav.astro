@@ -1,0 +1,35 @@
+---
+// Shared site header — used by the homepage and every blog page so the nav
+// stays identical everywhere. Links use absolute paths (/#...) so they work
+// from both the homepage and the /blog/* routes.
+---
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="brand"><span class="mark"></span> Moreland Data Consulting</a>
+    <div class="nav-links">
+      <a href="/#pillars" class="plain">What I do</a>
+      <a href="/#about" class="plain">About</a>
+      <a href="/#process" class="plain">How it works</a>
+      <a href="/blog" class="plain">Blog</a>
+      <a href="/#contact" class="nav-cta">Consulting</a>
+    </div>
+  </div>
+</nav>
+<style>
+  /* Container layout — kept here so the header lays out identically on the
+     homepage and blog pages regardless of each page's own stylesheet. The
+     nav bar, brand, links, and CTA styling come from the global styles both
+     pages already share. */
+  .nav-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 66px;
+  }
+  @media (max-width: 720px) {
+    .nav-links .plain { display: none; }
+  }
+</style>

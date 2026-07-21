@@ -1,4 +1,6 @@
 ---
+import Nav from '../components/Nav.astro';
+
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
 
 const businessSchema = {
@@ -273,18 +275,7 @@ const businessSchema = {
 </head>
 <body>
 
-<nav>
-  <div class="wrap">
-    <a href="#top" class="brand"><span class="mark"></span> Moreland Data Consulting</a>
-    <div class="nav-links">
-      <a href="#pillars" class="plain">What I do</a>
-      <a href="#about" class="plain">About</a>
-      <a href="#process" class="plain">How it works</a>
-      <a href="/blog" class="blog-link plain">Blog <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
-      <a href="#contact" class="nav-cta">Get in touch</a>
-    </div>
-  </div>
-</nav>
+<Nav />
 
 <header class="hero" id="top">
   <div class="wrap">
