@@ -49,8 +49,8 @@ nav .nav-inner { max-width: 1080px; margin: 0 auto; padding: 0 28px; display: fl
 .nav-links { display: flex; align-items: center; gap: 28px; }
 .nav-links a { font-size: 14.5px; color: var(--ink-soft); font-weight: 500; }
 .nav-links a:hover { color: var(--ink); text-decoration: none; }
-.nav-cta { background: var(--ink); color: #fff !important; padding: 9px 17px; border-radius: 8px; font-size: 14px; }
-.nav-cta:hover { background: #1d2c38; text-decoration: none; }
+.nav-cta { background: var(--signal); color: #fff !important; padding: 9px 17px; border-radius: 8px; font-size: 14px; }
+.nav-cta:hover { background: var(--signal-deep); text-decoration: none; }
 
 /* blog index */
 .blog-head { padding: 76px 0 20px; }
